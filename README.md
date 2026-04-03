@@ -6,6 +6,7 @@ A collection of custom Claude Code slash commands, agent skills, and workflow gu
 
 ```
 .claude/
+├── agents-plan/      # Agent will create plans to here automatically
 ├── commands/         # Slash command definitions
 ├── skills/           # Agent skill entry points (SKILL.md per agent)
 └── common-workflow/  # Six-step workflow fragments shared by agent skills
@@ -32,7 +33,7 @@ Deploy to `.claude/commands/` in a target project. Each file becomes a `/command
 
 Full-cycle delivery agents that orchestrate the 6-step common workflow end-to-end.
 
-### `/backend-agent` — FastAPI + PostgreSQL
+### `/backend-agent` — ex. FastAPI + PostgreSQL
 
 Invoke when implementing a backend feature or scaffolding a new service.
 
@@ -46,7 +47,7 @@ Key rules:
 - External services: extend `BaseHTTPService`, decorate with `@external_api`
 - Run `alembic revision --autogenerate` after every Entity change
 
-### `/frontend-agent` — React 19 + TypeScript
+### `/frontend-agent` — ex. React + TypeScript
 
 Invoke when implementing a frontend feature or building UI from a Figma design. Paste a Figma URL to auto-trigger design extraction before Step 01.
 
