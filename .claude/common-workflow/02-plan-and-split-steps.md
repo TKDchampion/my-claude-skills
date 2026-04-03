@@ -3,7 +3,7 @@
 ## Goal
 
 在需求確認後，先判斷專案類型與任務類型，套用對應的架構規範，再建立 branch 並把整體功能拆成可逐步實作、逐步驗證、逐步 commit 的 plan steps，
-並將每個步驟寫入 currentProject/`.claude/agents-plan/[your-feature]/plan-step-x.md`。
+並將每個步驟寫入 目前的專案的位置`.claude/agents-plan/[your-feature]/plan-step-x.md`。
 只有在使用者確認規劃內容合理後，才可進入 Step 03。
 
 ---
