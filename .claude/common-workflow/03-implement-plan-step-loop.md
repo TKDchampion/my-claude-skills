@@ -51,15 +51,31 @@ LOOP over plan-step-1 → plan-step-2 → ... → plan-step-N:
   2. 選擇對應 commands
   3. 進行實作
   4. 回報本步驟完成內容（見 Required Output Format）
-  5. 執行 `commands/git-review.md`，展示 diff 供使用者檢視
-  6. 等待使用者確認 diff 是否滿意
-  7. 若確認 OK → 執行 `commands/git-commit.md`，單獨 commit 該步驟
-  8. 自動進入下一個 plan-step，重複 loop
+
+  ── HARD STOP ── 實作完成後必須立即執行以下操作，不可跳過或合併步驟：
+
+  5. 使用 Skill tool 呼叫 `git-review`
+     → skill: "git-review"
+     → 展示完整 diff 報告，等待使用者明確確認（OK / 需修改）
+
+  6. ── WAIT FOR USER CONFIRMATION ── 禁止自動往下
+     → 若使用者說需修改：修正後回到步驟 5，重新執行 git-review
+     → 若使用者確認 OK：繼續步驟 7
+
+  7. 使用 Skill tool 呼叫 `git-commit`
+     → skill: "git-commit"
+     → commit message 必須包含本 plan-step 編號與目標
+     → commit 完成後才可繼續
+
+  8. 告知使用者「plan-step-x 已完成並 commit」
+     → ── WAIT FOR USER CONFIRMATION ── 等待使用者明確說「繼續」或「ok」後，才進入下一個 plan-step
+     → 禁止自動進入下一步
 
 END LOOP when 所有 plan-step 皆完成
 ```
 
-> 若使用者對 diff 不滿意，先修正再重新執行 git-review，直到確認為止。
+> **嚴格禁止**：不得在未呼叫 Skill tool 執行 git-review / git-commit 的情況下推進到下一個 plan-step。
+> 若使用者對 diff 不滿意，先修正再重新呼叫 git-review skill，直到確認為止。
 
 ---
 
@@ -122,13 +138,15 @@ END LOOP when 所有 plan-step 皆完成
 
 ### Git Review
 
-- 自動執行 `commands/git-review.md`
-- 展示 diff，等待使用者確認是否滿意
+- **必須使用 Skill tool 呼叫**：`skill: "git-review"`
+- 展示完整 diff 報告
+- **STOP** — 等待使用者明確回覆確認（不可自動繼續）
 
 ### Git Commit
 
-- 使用者確認後自動執行 `commands/git-commit.md`
-- 完成後繼續下一個 plan-step
+- 使用者確認 OK 後，**必須使用 Skill tool 呼叫**：`skill: "git-commit"`
+- commit message 格式：`[plan-step-x] <本步驟目標>`
+- commit 成功後，告知使用者並繼續下一個 plan-step
 
 ---
 

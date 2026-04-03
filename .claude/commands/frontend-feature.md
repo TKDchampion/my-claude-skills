@@ -5,6 +5,22 @@
 
 ---
 
+## 使用模式
+
+### 模式一：單獨使用（直接呼叫此 skill）
+
+依照下方「實作流程」從頭執行，包含詢問 Unit Test、實作所有層次、Lint/Type check，完成後結束。
+
+### 模式二：在 plan-step loop 中使用（由 `03-implement-plan-step-loop` 呼叫）
+
+本 skill 僅作為**程式碼品質規範與層次順序**指引，**不控制執行流程**：
+
+- **第一個 plan-step**：執行步驟 0 詢問 Unit Test，將結果套用至後續所有 plan-step，不再重複詢問
+- 依照當前 plan-step 的範圍實作對應層次即可，**不需實作完整 feature**
+- 完成本 plan-step 範圍後，**立即回報並停止**，等待 `03-implement-plan-step-loop` 執行 git-review / HARD STOP / git-commit
+
+---
+
 ## 核心原則
 
 ### 1. Feature-Based 模組架構 — 自包含，公開最小介面
@@ -32,6 +48,7 @@ src/features/[feature-name]/
 ```
 
 **禁止**：
+
 - 跨 feature 直接 import 內部模組（應透過 `index.ts` barrel）
 - 型別與常數定義混在元件檔案裡
 - 在 `index.ts` 以外 export 內部實作細節
@@ -82,13 +99,13 @@ function UserCard({ userId }: { userId: number }) {
 
 **Props 命名規範**：
 
-| 類型 | 規範 | 範例 |
-|------|------|------|
-| Boolean props | `is` / `has` / `can` 前綴 | `isLoading`, `hasError`, `canEdit` |
-| Event handler | `on` 前綴，動詞 | `onSubmit`, `onChange`, `onDelete` |
-| Render prop | `render` 前綴 | `renderEmpty`, `renderActions` |
-| Children variant | `children` 或 `slots` | `children: ReactNode` |
-| Data props | 名詞，語意清晰 | `user`, `items`, `selectedId` |
+| 類型             | 規範                      | 範例                               |
+| ---------------- | ------------------------- | ---------------------------------- |
+| Boolean props    | `is` / `has` / `can` 前綴 | `isLoading`, `hasError`, `canEdit` |
+| Event handler    | `on` 前綴，動詞           | `onSubmit`, `onChange`, `onDelete` |
+| Render prop      | `render` 前綴             | `renderEmpty`, `renderActions`     |
+| Children variant | `children` 或 `slots`     | `children: ReactNode`              |
+| Data props       | 名詞，語意清晰            | `user`, `items`, `selectedId`      |
 
 **Props 設計原則**：
 
@@ -128,6 +145,7 @@ interface GoodUserCardProps {
 ```
 
 **禁止**：
+
 - 未明確型別的 `any` props
 - 未使用的 props（ESLint `no-unused-vars` 應捕捉）
 - 過度 drilling（超過 3 層傳遞同一 prop → 考慮 context 或 store）
@@ -160,7 +178,7 @@ interface UserListProps {
 
 export function UserList({ users, isLoading, error, onDelete }: UserListProps) {
   if (isLoading) return <Skeleton />;
-  if (error)     return <ErrorState message={error.msg} />;
+  if (error) return <ErrorState message={error.msg} />;
   if (!users.length) return <EmptyState />;
 
   return (
@@ -219,13 +237,13 @@ export interface UpdateUserDTO extends Partial<CreateUserDTO> {}
 
 // Enum — 語意化狀態
 export enum UserRole {
-  Admin  = "admin",
+  Admin = "admin",
   Editor = "editor",
   Viewer = "viewer",
 }
 
 export enum UserStatus {
-  Active   = "active",
+  Active = "active",
   Inactive = "inactive",
 }
 
@@ -245,6 +263,7 @@ export function isUserRole(value: string): value is UserRole {
 ```
 
 **TypeScript 強制規則**：
+
 - 所有函數參數與回傳值標註型別（`strict: true`）
 - 禁止 `any`，用 `unknown` + type narrowing
 - API response 必須對應定義好的 interface
@@ -263,24 +282,25 @@ export function isUserRole(value: string): value is UserRole {
 export const USER_PAGE_SIZE = 20;
 
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
-  [UserRole.Admin]:  "管理員",
+  [UserRole.Admin]: "管理員",
   [UserRole.Editor]: "編輯者",
   [UserRole.Viewer]: "檢視者",
 };
 
 export const USER_STATUS_LABELS: Record<UserStatus, string> = {
-  [UserStatus.Active]:   "啟用",
+  [UserStatus.Active]: "啟用",
   [UserStatus.Inactive]: "停用",
 };
 
 export const USER_ROLE_OPTIONS = Object.entries(USER_ROLE_LABELS).map(
-  ([value, label]) => ({ value, label })
+  ([value, label]) => ({ value, label }),
 );
 
 // Query key 也是常數 — 放在 api/users.keys.ts
 ```
 
 **禁止**：
+
 - magic string / magic number 直接寫在元件裡
 - label 對應表散落在各元件
 - 重複定義同一個設定值
@@ -302,15 +322,15 @@ import type { UserFilters } from "../types";
 export function useUsers(filters?: UserFilters) {
   return useQuery({
     queryKey: usersKeys.list(filters),
-    queryFn:  () => usersApi.getAll(filters),
+    queryFn: () => usersApi.getAll(filters),
   });
 }
 
 export function useUser(id: number) {
   return useQuery({
     queryKey: usersKeys.detail(id),
-    queryFn:  () => usersApi.getById(id),
-    enabled:  !!id,
+    queryFn: () => usersApi.getById(id),
+    enabled: !!id,
   });
 }
 
@@ -318,7 +338,7 @@ export function useCreateUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: CreateUserDTO) => usersApi.create(dto),
-    onSuccess:  () => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: usersKeys.lists() });
       toast.success("用戶建立成功");
     },
@@ -331,12 +351,12 @@ export function useUserFilters() {
 
   const setSearch = useCallback(
     (search: string) => setFilters((prev) => ({ ...prev, search })),
-    []
+    [],
   );
 
   const setRole = useCallback(
     (role: UserRole | undefined) => setFilters((prev) => ({ ...prev, role })),
-    []
+    [],
   );
 
   const reset = useCallback(() => setFilters({}), []);
@@ -346,6 +366,7 @@ export function useUserFilters() {
 ```
 
 **Hook 規則**：
+
 - Hook 名稱一律 `use` 開頭
 - 只在 React 元件或其他 hooks 頂層呼叫
 - 一個 hook 只負責一個關注點（資料獲取 / UI state / 業務邏輯分開）
@@ -363,9 +384,11 @@ import { z } from "zod";
 import { UserRole } from "../types";
 
 export const createUserSchema = z.object({
-  name:   z.string().min(1, "名稱不可為空").max(100),
-  email:  z.string().email("請輸入有效的 Email"),
-  roleId: z.nativeEnum(UserRole, { errorMap: () => ({ message: "請選擇角色" }) }),
+  name: z.string().min(1, "名稱不可為空").max(100),
+  email: z.string().email("請輸入有效的 Email"),
+  roleId: z.nativeEnum(UserRole, {
+    errorMap: () => ({ message: "請選擇角色" }),
+  }),
 });
 
 export type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -383,7 +406,11 @@ interface UserFormProps {
   isSubmitting: boolean;
 }
 
-export function UserForm({ defaultValues, onSubmit, isSubmitting }: UserFormProps) {
+export function UserForm({
+  defaultValues,
+  onSubmit,
+  isSubmitting,
+}: UserFormProps) {
   const {
     register,
     handleSubmit,
@@ -452,6 +479,7 @@ export function UsersPage() {
 ```
 
 **禁止**：
+
 - `try/catch` 吞掉 error 不處理
 - 直接 `console.error` 而不 toast / rethrow
 - bare `catch (e) { ... }` 不標註型別
@@ -485,6 +513,7 @@ const UsersPage = lazy(() => import("@/features/users/components/UsersPage"));
 ```
 
 **禁止**：
+
 - 對所有元件都加 `React.memo`（過早優化）
 - 在 render 裡建立 inline function 傳給已被 memo 的子元件（破壞 memo 效果）
 - 大型 list 不分頁或不使用虛擬化（> 200 行考慮 `@tanstack/virtual`）
@@ -510,6 +539,7 @@ const UsersPage = lazy(() => import("@/features/users/components/UsersPage"));
 ```
 
 **每次實作完執行**：
+
 ```bash
 npm run lint
 npm run type-check
@@ -519,17 +549,17 @@ npm run type-check
 
 ### 12. 命名規範
 
-| 類型 | 規範 | 範例 |
-|------|------|------|
-| 元件 | `PascalCase` | `UserCard`, `UserForm` |
-| Hook | `camelCase`，`use` 開頭 | `useUsers`, `useUserFilters` |
-| 函數 | `camelCase`，動詞開頭 | `handleSubmit`, `formatDate` |
-| 型別/介面 | `PascalCase` | `User`, `UserFilters`, `ApiError` |
-| Enum | `PascalCase`，成員 `PascalCase` | `UserRole.Admin` |
-| 常數 | `UPPER_SNAKE_CASE` | `USER_PAGE_SIZE` |
-| 檔案（元件）| `PascalCase.tsx` | `UserCard.tsx` |
-| 檔案（其他）| `kebab-case.ts` | `use-users.ts`, `users.api.ts` |
-| CSS class | `kebab-case` | `user-card`, `is-active` |
+| 類型         | 規範                            | 範例                              |
+| ------------ | ------------------------------- | --------------------------------- |
+| 元件         | `PascalCase`                    | `UserCard`, `UserForm`            |
+| Hook         | `camelCase`，`use` 開頭         | `useUsers`, `useUserFilters`      |
+| 函數         | `camelCase`，動詞開頭           | `handleSubmit`, `formatDate`      |
+| 型別/介面    | `PascalCase`                    | `User`, `UserFilters`, `ApiError` |
+| Enum         | `PascalCase`，成員 `PascalCase` | `UserRole.Admin`                  |
+| 常數         | `UPPER_SNAKE_CASE`              | `USER_PAGE_SIZE`                  |
+| 檔案（元件） | `PascalCase.tsx`                | `UserCard.tsx`                    |
+| 檔案（其他） | `kebab-case.ts`                 | `use-users.ts`, `users.api.ts`    |
+| CSS class    | `kebab-case`                    | `user-card`, `is-active`          |
 
 ---
 
@@ -538,20 +568,24 @@ npm run type-check
 每次新增 feature 前，確認以下項目：
 
 **型別與常數**
+
 - [ ] `types/index.ts` 定義所有 DTO、Enum、UI 型別
 - [ ] `constants/index.ts` 定義 label map、config 值
 - [ ] 禁止 magic string / magic number 散落在元件
 
 **API 層**
+
 - [ ] `[feature].api.ts` 繼承 `HttpClient`
 - [ ] `[feature].keys.ts` 定義 query key factory
 
 **Hooks 層**
+
 - [ ] 每個 hook 單一職責（資料 / UI state / 業務邏輯分開）
 - [ ] Query hook 有 `enabled` guard（避免空 id 觸發請求）
 - [ ] Mutation hook 在 `onSuccess` 做 `invalidateQueries`
 
 **元件層**
+
 - [ ] Page 元件只做資料獲取與組裝
 - [ ] Presentational 元件只接受 props，不直接呼叫 API
 - [ ] Props interface 定義在元件檔頂部，有完整型別
@@ -559,21 +593,25 @@ npm run type-check
 - [ ] Event handler props 使用 `on` 前綴
 
 **表單**
+
 - [ ] Zod schema 獨立定義在 `[Feature]Form.schema.ts`
 - [ ] 使用 `zodResolver` 整合 React Hook Form
 - [ ] `isSubmitting` 狀態傳入表單禁用送出按鈕
 
 **錯誤處理**
+
 - [ ] API 錯誤有 `onError` 處理（全局或 feature-level）
 - [ ] 頁面有 `<ErrorBoundary>` 包覆
 - [ ] 無 bare catch 吞掉 error
 
 **效能**
+
 - [ ] List 元件有 `key` prop（不用 index）
 - [ ] 昂貴計算使用 `useMemo`
 - [ ] 傳給已 memo 子元件的 handler 使用 `useCallback`
 
 **品質**
+
 - [ ] `npm run lint` 通過，無 error
 - [ ] `npm run type-check` 通過，無 error
 - [ ] 元件單一檔案不超過 200 行
@@ -621,7 +659,9 @@ import { useUsers } from "./use-users";
 
 describe("useUsers", () => {
   it("should return users list on success", async () => {
-    const { result } = renderHook(() => useUsers(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useUsers(), {
+      wrapper: createWrapper(),
+    });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toHaveLength(2);
   });
@@ -660,11 +700,12 @@ describe("UserCard", () => {
 
 ---
 
-## 實作流程
+## 實作流程（程式碼層次順序）
 
-收到功能需求後，**按以下順序實作**：
+> **模式一（單獨使用）**：依序執行步驟 0–8，完成後結束。
+> **模式二（plan-step loop）**：在**第一個 plan-step** 執行步驟 0 詢問 Unit Test，之後所有 plan-step 套用該結論，不再重複詢問；完成當前層次後立即停止回報。
 
-0. **詢問 Unit Test** → 確認使用者是否要一併撰寫 Unit Test
+0. **詢問 Unit Test** → 確認使用者是否要一併撰寫 Unit Test（模式一：每次詢問；模式二：僅第一個 plan-step 詢問，後續 plan-step 略過此步驟）
 1. **分析需求** → 識別需要哪些 API、型別、元件、hooks
 2. **型別定義** → `features/[name]/types/index.ts` 先把 interface 定好
 3. **常數定義** → `features/[name]/constants/index.ts` 定義 enum label、config
@@ -674,12 +715,18 @@ describe("UserCard", () => {
 7. **Barrel export** → `index.ts` 公開外部需要的介面
 8. **Lint / Type check** → 確保品質
 
-每步驟完成後才進行下一步，**不跳步、不混層**。
+每個層次完成後才進行下一層次，**不跳層、不混層**。
 
 ---
 
 ## 任務
 
+**模式一（單獨使用）**：
 請根據使用者描述的功能需求，嚴格依照上述規範實作完整 feature 模組。
-**開始前先詢問使用者是否需要撰寫 Unit Test。**
+開始前先詢問使用者是否需要撰寫 Unit Test。
 若需求不清楚，先提問釐清再實作。
+
+**模式二（plan-step loop）**：
+依照當前 plan-step 的範圍，套用上述品質規範實作對應層次。
+若為第一個 plan-step，先執行步驟 0 詢問 Unit Test，並將結果套用至後續所有 plan-step。
+完成後回報並停止，**禁止自動繼續下一個 plan-step**。

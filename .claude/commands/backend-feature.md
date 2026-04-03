@@ -5,6 +5,22 @@
 
 ---
 
+## 使用模式
+
+### 模式一：單獨使用（直接呼叫此 skill）
+
+依照下方「實作流程」從頭執行，包含詢問 Unit Test、實作所有層次，完成後結束。
+
+### 模式二：在 plan-step loop 中使用（由 `03-implement-plan-step-loop` 呼叫）
+
+本 skill 僅作為**程式碼品質規範與層次順序**指引，**不控制執行流程**：
+
+- **第一個 plan-step**：執行步驟 0 詢問 Unit Test，將結果套用至後續所有 plan-step，不再重複詢問
+- 依照當前 plan-step 的範圍實作對應層次即可，**不需實作完整 feature**
+- 完成本 plan-step 範圍後，**立即回報並停止**，等待 `03-implement-plan-step-loop` 執行 git-review / HARD STOP / git-commit
+
+---
+
 ## 核心原則
 
 ### 1. Clean Architecture — 層次分離，職責單一
@@ -282,15 +298,15 @@ def get_report_or_raise(db: Session, report_id: int) -> ReportEntity:
 
 ### 10. 命名規範 — 語意清晰
 
-| 類型 | 規範 | 範例 |
-|------|------|------|
-| 函數 | `snake_case`，動詞開頭 | `create_report`, `get_all_by_org` |
-| 類別 | `PascalCase` | `ReportEntity`, `CreateReportDTO` |
-| 常數 | `UPPER_SNAKE_CASE` | `MAX_RETRY_COUNT` |
-| 私有函數 | `_` 前綴 | `_ensure_report_belongs_to_org` |
-| DTO | 動作 + 名詞 + `DTO` | `CreateReportDTO`, `ReportResponseDTO` |
-| Entity | 名詞 + `Entity` | `ReportEntity` |
-| Repository | 函數名稱語意化 | `find_by_id`, `find_all_by_org` |
+| 類型       | 規範                   | 範例                                   |
+| ---------- | ---------------------- | -------------------------------------- |
+| 函數       | `snake_case`，動詞開頭 | `create_report`, `get_all_by_org`      |
+| 類別       | `PascalCase`           | `ReportEntity`, `CreateReportDTO`      |
+| 常數       | `UPPER_SNAKE_CASE`     | `MAX_RETRY_COUNT`                      |
+| 私有函數   | `_` 前綴               | `_ensure_report_belongs_to_org`        |
+| DTO        | 動作 + 名詞 + `DTO`    | `CreateReportDTO`, `ReportResponseDTO` |
+| Entity     | 名詞 + `Entity`        | `ReportEntity`                         |
+| Repository | 函數名稱語意化         | `find_by_id`, `find_all_by_org`        |
 
 ---
 
@@ -299,28 +315,34 @@ def get_report_or_raise(db: Session, report_id: int) -> ReportEntity:
 每次新增功能前，確認以下項目：
 
 **Entity**
+
 - [ ] 建立在 `app/entities/` 並在 `__init__.py` import
 - [ ] 執行 `alembic revision --autogenerate` 並 review migration
 
 **DTO**
+
 - [ ] Request / Response 分開定義
 - [ ] 所有欄位加上型別標註與 `Field` 驗證
 - [ ] Response DTO 設定 `from_attributes = True`
 
 **Repository**
+
 - [ ] 只有 CRUD，無業務邏輯
 - [ ] 使用 `db.flush()` 而非 `db.commit()`（讓 `@db_tx` 統一管理）
 
 **Service**
+
 - [ ] 需要 Transaction 的函數加 `@db_tx`
 - [ ] 呼叫 Domain 的 `check_exist` 驗證存在性
 
 **Router**
+
 - [ ] 每個 endpoint 加 `@router_try()`
 - [ ] 每個 endpoint 呼叫 `verify_user_permission`
 - [ ] 在 `app/main.py` 註冊 router
 
 **通用**
+
 - [ ] 所有函數有型別標註
 - [ ] 無 bare `except`
 - [ ] 無跨層直接呼叫
@@ -398,11 +420,12 @@ def test_create_report_returns_dto(mock_repo, db_session):
 
 ---
 
-## 實作流程
+## 實作流程（程式碼層次順序）
 
-收到功能需求後，**按以下順序實作**：
+> **模式一（單獨使用）**：依序執行步驟 0–8，完成後結束。
+> **模式二（plan-step loop）**：在**第一個 plan-step** 執行步驟 0 詢問 Unit Test，之後所有 plan-step 套用該結論，不再重複詢問；完成當前層次後立即停止回報。
 
-0. **詢問 Unit Test** → 確認使用者是否要一併撰寫 Unit Test
+0. **詢問 Unit Test** → 確認使用者是否要一併撰寫 Unit Test（模式一：每次詢問；模式二：僅第一個 plan-step 詢問，後續 plan-step 略過此步驟）
 1. **分析需求** → 識別需要哪些 Entity、DTO、Service 函數、Endpoint
 2. **Entity** → 建立或修改 ORM 模型 → 執行 migration
 3. **DTO** → 定義 Request / Response Pydantic model
@@ -412,12 +435,18 @@ def test_create_report_returns_dto(mock_repo, db_session):
 7. **Router** → 建立 endpoint，加權限驗證 `→ 若選擇 Unit Test，同步撰寫 Router 測試`
 8. **main.py** → 註冊 router
 
-每步驟完成後才進行下一步，**不跳步、不合併層次**。
+每個層次完成後才進行下一層次，**不跳層、不合併層次**。
 
 ---
 
 ## 任務
 
+**模式一（單獨使用）**：
 請根據使用者描述的功能需求，嚴格依照上述規範實作完整功能。
-**開始前先詢問使用者是否需要撰寫 Unit Test。**
+開始前先詢問使用者是否需要撰寫 Unit Test。
 若需求不清楚，先提問釐清再實作。
+
+**模式二（plan-step loop）**：
+依照當前 plan-step 的範圍，套用上述品質規範實作對應層次。
+若為第一個 plan-step，先執行步驟 0 詢問 Unit Test，並將結果套用至後續所有 plan-step。
+完成後回報並停止，**禁止自動繼續下一個 plan-step**。

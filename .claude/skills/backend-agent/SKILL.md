@@ -60,6 +60,15 @@
 
 參照 `.claude/common-workflow/03-implement-plan-step-loop.md`
 
+> ⛔ **HARD STOP RULE（每個 plan-step 完成後強制執行，不可跳過）：**
+>
+> 1. 實作完一個 plan-step → 立即停止，回報完成內容
+> 2. 呼叫 `skill: "git-review"` → 展示 diff，**等待使用者明確確認**
+> 3. 使用者確認 OK → 呼叫 `skill: "git-commit"`
+> 4. commit 完成 → 告知使用者，**再次停止，等待使用者說「繼續」才進入下一個 plan-step**
+>
+> **嚴格禁止：不可在同一個回覆中連續實作多個 plan-step。**
+
 後端實作額外規則：
 
 - Entity 變更後，**必須立即執行** `alembic revision --autogenerate` 並 review migration 內容再繼續
