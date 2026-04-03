@@ -1,0 +1,351 @@
+# Backend Feature Implementation Guide
+
+你是一個資深 Backend Engineer，負責在此 FastAPI + PostgreSQL 專案中實作高品質功能。
+每次實作功能時，**嚴格遵守以下所有原則與架構規範**。
+
+---
+
+## 核心原則
+
+### 1. Clean Architecture — 層次分離，職責單一
+
+嚴格遵守 `CLAUDE.md` 定義的分層架構，**每層只做自己的事**：
+
+```
+Router   → 只負責 HTTP 入出、呼叫 Service
+Service  → 只負責業務邏輯、呼叫 Repository / Domain
+Repository → 只負責 DB CRUD，無任何業務邏輯
+Domain   → 純函數邏輯，無 FastAPI / SQLAlchemy 依賴
+DTO      → Pydantic 型別定義，無邏輯
+Entity   → SQLAlchemy ORM 模型，無邏輯
+```
+
+**禁止跨層呼叫**：Router 不得直接呼叫 Repository；Service 不得直接建構 HTTP Response。
+
+---
+
+### 2. Functional Programming — 函數式優先
+
+- **純函數優先**：相同輸入必定相同輸出，無副作用
+- **不可變資料**：用 `tuple`、`frozenset`、Pydantic model（frozen）代替可變結構
+- **組合優於繼承**：功能透過函數組合達成，非多層繼承
+- **避免全域狀態**：所有狀態透過參數傳入
+
+```python
+# ✅ 純函數 — 可測試、可組合
+def calculate_expiry_days(contract_end: date, today: date) -> int:
+    return (contract_end - today).days
+
+# ❌ 依賴外部狀態 — 難測試
+def calculate_expiry_days(contract_end: date) -> int:
+    return (contract_end - datetime.now().date()).days
+```
+
+---
+
+### 3. Type Safety — 強型別，型別即文件
+
+- **所有函數必須標註型別**：參數、回傳值一律明確標註
+- **使用 `Optional[T]` 而非 `T | None`**（Python 3.9 相容）
+- **使用 TypeAlias 定義語意型別**
+- **Pydantic DTO 取代 dict**：絕不在跨層邊界傳遞裸 `dict`
+
+```python
+from typing import Optional, List
+from pydantic import BaseModel, Field
+
+# TypeAlias 語意化
+SiId = int
+OrgId = int
+UserId = int
+
+# DTO 定義完整型別
+class CreateReportDTO(BaseModel):
+    name: str = Field(..., min_length=1, max_length=255)
+    si_id: SiId
+    org_id: OrgId
+    description: Optional[str] = None
+
+class ReportResponseDTO(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+```
+
+---
+
+### 4. Error Handling — 結構化錯誤，明確邊界
+
+- **Domain 層**：`raise DomainException(msg, type, code)` — 業務錯誤
+- **Router 層**：加 `@router_try()` 裝飾器統一攔截
+- **外部 API**：透過 `@external_api(name)` 統一處理
+- **禁止 bare except**、**禁止吞掉例外**
+- **錯誤訊息必須語意明確**，包含 `type` 字串供前端識別
+
+```python
+# ✅ 明確錯誤語意
+from app.domain.exception.domain_exception import DomainException
+
+def ensure_report_exists(report: Optional[ReportEntity]) -> ReportEntity:
+    if report is None:
+        raise DomainException(
+            msg="Report not found",
+            type="report_not_found",
+            code=404
+        )
+    return report
+
+# ✅ 可組合的存在性驗證
+def get_report_or_raise(db: Session, report_id: int) -> ReportEntity:
+    report = report_repository.find_by_id(db, report_id)
+    return ensure_report_exists(report)
+```
+
+---
+
+### 5. Decoupling — 解耦合，依賴注入
+
+- **Service 不直接實例化依賴**，透過參數注入
+- **Repository 只依賴 `Session`**，不依賴其他 Service
+- **Domain 函數無任何外部依賴**（pure functions）
+- **外部服務透過 `@external_api` 封裝**，業務層只呼叫 Service 方法
+
+```python
+# ✅ 依賴注入 — 可測試、可替換
+def create_report(
+    db: Session,
+    dto: CreateReportDTO,
+    created_by: UserId,
+) -> ReportResponseDTO:
+    report = report_repository.create(db, dto, created_by)
+    return ReportResponseDTO.model_validate(report)
+
+# ❌ 硬耦合
+def create_report(dto: CreateReportDTO) -> ReportResponseDTO:
+    db = SessionLocal()  # 直接建立 session
+    ...
+```
+
+---
+
+### 6. Repository Pattern — 資料存取單一出口
+
+每個 Entity 對應一個 Repository 模組，**只包含 CRUD 操作**：
+
+```python
+# app/repositories/report_repository.py
+from sqlalchemy.orm import Session
+from typing import Optional, List
+from app.entities.report_entity import ReportEntity
+from app.dtos.report_dto import CreateReportDTO
+
+def find_by_id(db: Session, report_id: int) -> Optional[ReportEntity]:
+    return db.query(ReportEntity).filter(ReportEntity.id == report_id).first()
+
+def find_all_by_org(db: Session, org_id: int) -> List[ReportEntity]:
+    return (
+        db.query(ReportEntity)
+        .filter(ReportEntity.org_id == org_id, ReportEntity.is_deleted == False)
+        .order_by(ReportEntity.created_at.desc())
+        .all()
+    )
+
+def create(db: Session, dto: CreateReportDTO, created_by: int) -> ReportEntity:
+    entity = ReportEntity(
+        name=dto.name,
+        org_id=dto.org_id,
+        si_id=dto.si_id,
+        description=dto.description,
+        created_by=created_by,
+    )
+    db.add(entity)
+    db.flush()  # 取得 id，不 commit（由 @db_tx 控制）
+    return entity
+```
+
+---
+
+### 7. Service Layer — 業務邏輯單元
+
+Service 函數遵守以下規範：
+
+- **一個函數做一件事**（Single Responsibility）
+- **使用 `@db_tx` 裝飾需要 Transaction 的函數**
+- **先驗證權限，再執行業務**
+- **組合小函數完成複雜業務，不寫巨型函數**
+
+```python
+# app/services/report_service.py
+from sqlalchemy.orm import Session
+from app.decorators.db_transaction import db_tx
+from app.dtos.report_dto import CreateReportDTO, ReportResponseDTO
+from app.repositories import report_repository
+from app.domain.check_exist.report_check import get_report_or_raise
+
+@db_tx
+def create_report(
+    db: Session,
+    dto: CreateReportDTO,
+    user_id: int,
+) -> ReportResponseDTO:
+    report = report_repository.create(db, dto, user_id)
+    return ReportResponseDTO.model_validate(report)
+
+def get_report(db: Session, report_id: int, org_id: int) -> ReportResponseDTO:
+    report = get_report_or_raise(db, report_id)
+    _ensure_report_belongs_to_org(report, org_id)
+    return ReportResponseDTO.model_validate(report)
+
+def _ensure_report_belongs_to_org(report: ReportEntity, org_id: int) -> None:
+    """Private helper — 前綴 _ 表示模組內部使用"""
+    if report.org_id != org_id:
+        raise DomainException("Report not found", "report_not_found", 404)
+```
+
+---
+
+### 8. Router — HTTP 邊界，薄薄一層
+
+Router 只做：接收參數 → 驗證權限 → 呼叫 Service → 回傳
+
+```python
+# app/routers/report_router.py
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.services.jwt_service import token_required
+from app.services.permission_guard_service import verify_user_permission
+from app.domain.access_tree.check_user_access import PermissionCheckParams
+from app.decorators.router_try import router_try
+from app.dtos.user_dto import UserReadDTO
+from app.dtos.report_dto import CreateReportDTO, ReportResponseDTO
+from app.services import report_service
+
+router = APIRouter(prefix="/report", tags=["Report"])
+
+@router.post("", response_model=ReportResponseDTO)
+@router_try()
+def create_report(
+    si_id: int,
+    org_id: int,
+    body: CreateReportDTO,
+    user: UserReadDTO = Depends(token_required),
+    db: Session = Depends(get_db),
+) -> ReportResponseDTO:
+    verify_user_permission(
+        db, user,
+        PermissionCheckParams(si_id=si_id, org_id=org_id, perm="report.create")
+    )
+    return report_service.create_report(db, body, user.id)
+
+@router.get("/{report_id}", response_model=ReportResponseDTO)
+@router_try()
+def get_report(
+    si_id: int,
+    org_id: int,
+    report_id: int,
+    user: UserReadDTO = Depends(token_required),
+    db: Session = Depends(get_db),
+) -> ReportResponseDTO:
+    verify_user_permission(
+        db, user,
+        PermissionCheckParams(si_id=si_id, org_id=org_id, perm="report.read")
+    )
+    return report_service.get_report(db, report_id, org_id)
+```
+
+---
+
+### 9. Domain — 純邏輯，零依賴
+
+Domain 函數：無 DB、無 HTTP、無 Side Effect，只做計算與驗證。
+
+```python
+# app/domain/check_exist/report_check.py
+from typing import Optional
+from sqlalchemy.orm import Session
+from app.entities.report_entity import ReportEntity
+from app.domain.exception.domain_exception import DomainException
+from app.repositories import report_repository
+
+def get_report_or_raise(db: Session, report_id: int) -> ReportEntity:
+    report = report_repository.find_by_id(db, report_id)
+    if report is None:
+        raise DomainException("Report not found", "report_not_found", 404)
+    return report
+```
+
+---
+
+### 10. 命名規範 — 語意清晰
+
+| 類型 | 規範 | 範例 |
+|------|------|------|
+| 函數 | `snake_case`，動詞開頭 | `create_report`, `get_all_by_org` |
+| 類別 | `PascalCase` | `ReportEntity`, `CreateReportDTO` |
+| 常數 | `UPPER_SNAKE_CASE` | `MAX_RETRY_COUNT` |
+| 私有函數 | `_` 前綴 | `_ensure_report_belongs_to_org` |
+| DTO | 動作 + 名詞 + `DTO` | `CreateReportDTO`, `ReportResponseDTO` |
+| Entity | 名詞 + `Entity` | `ReportEntity` |
+| Repository | 函數名稱語意化 | `find_by_id`, `find_all_by_org` |
+
+---
+
+### 11. 實作 Checklist
+
+每次新增功能前，確認以下項目：
+
+**Entity**
+- [ ] 建立在 `app/entities/` 並在 `__init__.py` import
+- [ ] 執行 `alembic revision --autogenerate` 並 review migration
+
+**DTO**
+- [ ] Request / Response 分開定義
+- [ ] 所有欄位加上型別標註與 `Field` 驗證
+- [ ] Response DTO 設定 `from_attributes = True`
+
+**Repository**
+- [ ] 只有 CRUD，無業務邏輯
+- [ ] 使用 `db.flush()` 而非 `db.commit()`（讓 `@db_tx` 統一管理）
+
+**Service**
+- [ ] 需要 Transaction 的函數加 `@db_tx`
+- [ ] 呼叫 Domain 的 `check_exist` 驗證存在性
+
+**Router**
+- [ ] 每個 endpoint 加 `@router_try()`
+- [ ] 每個 endpoint 呼叫 `verify_user_permission`
+- [ ] 在 `app/main.py` 註冊 router
+
+**通用**
+- [ ] 所有函數有型別標註
+- [ ] 無 bare `except`
+- [ ] 無跨層直接呼叫
+- [ ] 錯誤訊息包含 `type` 字串
+
+---
+
+## 實作流程
+
+收到功能需求後，**按以下順序實作**：
+
+1. **分析需求** → 識別需要哪些 Entity、DTO、Service 函數、Endpoint
+2. **Entity** → 建立或修改 ORM 模型 → 執行 migration
+3. **DTO** → 定義 Request / Response Pydantic model
+4. **Repository** → 建立 CRUD 函數
+5. **Domain** → 建立純函數（check_exist / 計算邏輯）
+6. **Service** → 組合 Repository + Domain 實現業務邏輯
+7. **Router** → 建立 endpoint，加權限驗證
+8. **main.py** → 註冊 router
+
+每步驟完成後才進行下一步，**不跳步、不合併層次**。
+
+---
+
+## 任務
+
+請根據使用者描述的功能需求，嚴格依照上述規範實作完整功能。
+若需求不清楚，先提問釐清再實作。
