@@ -30,6 +30,7 @@
 參照 `.claude/common-workflow/01-analyze-qa.md`
 
 前端額外需釐清的項目：
+
 - 需要新增 / 修改哪些頁面或元件
 - 對接的 API endpoints（method、path、request / response schema）
 - UI/UX 設計稿或描述是否存在
@@ -49,10 +50,12 @@
 
 > **傳入參數：`project_type = frontend`**
 > Step 02 收到此參數後，會根據 task type 決定套用：
+>
 > - 新建專案 → `.claude/commands/frontend-architecture.md`
 > - 實作功能 → `.claude/commands/frontend-feature.md`
 
 前端 plan-step 拆分原則（依實作順序）：
+
 1. 型別定義（`types/index.ts`）
 2. 常數定義（`constants/index.ts`）
 3. API 層（`[feature].api.ts` + `[feature].keys.ts`）
@@ -69,9 +72,10 @@
 
 ### Step 03 — Implement Each Plan Step
 
-參照 `.claude/common-workflow/03-implement-plan-step.md`
+參照 `.claude/common-workflow/03-implement-plan-step-loop.md`
 
 前端實作額外規則：
+
 - 所有 UI 樣式使用 Tailwind CSS，**禁止** inline style 或單獨 CSS 檔案
 - 使用超過一次的 UI 元件必須抽到 `shared/components/`，禁止重複定義
 - 表單必須使用 React Hook Form + Zod，schema 獨立定義在 `[Feature]Form.schema.ts`
@@ -87,12 +91,14 @@
 > 此步驟在 Step 03 完成後執行，確認元件沒有不必要的重複定義。
 
 檢查清單：
+
 - [ ] 新實作的 UI 元件中，有沒有可提升到 `shared/components/` 的通用元件
 - [ ] 確認所有 `<button>`、`<input>`、`<select>` 等基礎元素都使用了 shared 元件而非裸 HTML
 - [ ] 已存在的 shared 元件沒有在 feature 內被 override 或重新實作
 - [ ] 新的 shared 元件有完整的 props interface 與 Tailwind variant 設計
 
 回報格式：
+
 ```
 New shared components extracted:
   - shared/components/[ComponentName].tsx — 說明用途
@@ -113,18 +119,21 @@ Raw HTML elements found (need attention):
 前端測試額外項目：
 
 **Static Checks**
+
 - [ ] `npm run type-check`（或 `tsc --noEmit`）無 error
 - [ ] `npm run lint`（ESLint）無 error
 - [ ] 無 `any` 型別使用（`@typescript-eslint/no-explicit-any: error`）
 - [ ] 無未使用的 import / variable
 
 **Runtime Checks**
+
 - [ ] `npm run build` 成功，無 warning（或 warning 已知且可接受）
 - [ ] 頁面在瀏覽器中正常開啟與渲染
 - [ ] Loading state、Empty state、Error state 都正常顯示
 - [ ] 表單驗證（必填缺失、格式錯誤、送出成功 / 失敗）正常
 
 **前端特有邊界測試**
+
 - [ ] API 錯誤時 toast / error boundary 正確觸發
 - [ ] Token 過期時自動導向 login
 - [ ] Pagination 邊界（第一頁、最後一頁、無資料）
@@ -139,10 +148,11 @@ Raw HTML elements found (need attention):
 對每個新增或修改的頁面 / 元件進行視覺確認：
 
 | 頁面 / 元件 | Desktop | Mobile（若適用） | 備註 |
-|---|---|---|---|
-| | ✅ / ❌ | ✅ / ❌ | |
+| ----------- | ------- | ---------------- | ---- |
+|             | ✅ / ❌ | ✅ / ❌          |      |
 
 確認項目：
+
 - [ ] 排版符合設計稿或需求描述
 - [ ] Tailwind class 沒有衝突或失效
 - [ ] 互動狀態（hover、focus、disabled、loading）視覺正確
@@ -155,6 +165,7 @@ Raw HTML elements found (need attention):
 參照 `.claude/common-workflow/05-code-review-security-and-improvements.md`
 
 前端安全額外檢查：
+
 - [ ] 無 `dangerouslySetInnerHTML` 或若有使用，確認內容來源是否安全
 - [ ] API token / secret 未 hardcode 在前端程式碼中
 - [ ] 敏感資訊未被 console.log 或 localStorage 暴露
@@ -170,6 +181,7 @@ Raw HTML elements found (need attention):
 參照 `.claude/common-workflow/06-explain-changes-and-final-review.md`
 
 前端交付額外輸出：
+
 - 新增 / 修改的頁面 & 路由列表
 - 新增的 shared components 列表
 - 新增 / 修改的 API hooks 列表
@@ -181,12 +193,12 @@ Raw HTML elements found (need attention):
 
 ## Quick Reference — Frontend Layer Rules
 
-| Layer | 位置 | 允許 | 禁止 |
-|---|---|---|---|
-| Types | `features/*/types/` | Pydantic-style interface, Enum | 邏輯、副作用 |
-| Constants | `features/*/constants/` | 純常數、label map | 動態計算 |
-| API | `features/*/api/` | HttpClient 繼承、query keys | 直接 axios、業務邏輯 |
-| Hooks | `features/*/hooks/` | useQuery、useMutation、useState | 直接 DOM 操作 |
-| Components | `features/*/components/` | Props、shared components、hooks | 直接 API 呼叫、跨 feature import |
-| Shared | `shared/components/` | 通用 UI 元件 | feature-specific 邏輯 |
-| Core | `core/` | infrastructure（axios、error、auth） | feature 業務邏輯 |
+| Layer      | 位置                     | 允許                                 | 禁止                             |
+| ---------- | ------------------------ | ------------------------------------ | -------------------------------- |
+| Types      | `features/*/types/`      | Pydantic-style interface, Enum       | 邏輯、副作用                     |
+| Constants  | `features/*/constants/`  | 純常數、label map                    | 動態計算                         |
+| API        | `features/*/api/`        | HttpClient 繼承、query keys          | 直接 axios、業務邏輯             |
+| Hooks      | `features/*/hooks/`      | useQuery、useMutation、useState      | 直接 DOM 操作                    |
+| Components | `features/*/components/` | Props、shared components、hooks      | 直接 API 呼叫、跨 feature import |
+| Shared     | `shared/components/`     | 通用 UI 元件                         | feature-specific 邏輯            |
+| Core       | `core/`                  | infrastructure（axios、error、auth） | feature 業務邏輯                 |

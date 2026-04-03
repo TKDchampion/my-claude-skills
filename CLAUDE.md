@@ -18,17 +18,17 @@ common-workflow/  # Six-step numbered workflow fragments referenced by agent ski
 
 Each `.md` file becomes a slash command (`/filename`) in target projects:
 
-| File | Purpose |
-|---|---|
-| `git-commit.md` | Conventional commit flow with confirmation gate |
-| `git-review.md` | Pre-commit review: tests, security, code quality |
-| `backend-feature.md` | FastAPI feature implementation with layered architecture rules |
-| `backend-architecture.md` | New backend project scaffold (Flat/Feature-based/DDD selection) |
-| `frontend-feature.md` | React/TypeScript feature implementation rules |
-| `frontend-architecture.md` | New frontend project scaffold and architecture plan |
-| `security-review.md` | Deep security review: OWASP, Trail of Bits, DB, race conditions, AI leakage |
-| `owasp-security.md` | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security reference |
-| `hello.md` | Test command |
+| File                       | Purpose                                                                     |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `git-commit.md`            | Conventional commit flow with confirmation gate                             |
+| `git-review.md`            | Pre-commit review: tests, security, code quality                            |
+| `backend-feature.md`       | FastAPI feature implementation with layered architecture rules              |
+| `backend-architecture.md`  | New backend project scaffold (Flat/Feature-based/DDD selection)             |
+| `frontend-feature.md`      | React/TypeScript feature implementation rules                               |
+| `frontend-architecture.md` | New frontend project scaffold and architecture plan                         |
+| `security-review.md`       | Deep security review: OWASP, Trail of Bits, DB, race conditions, AI leakage |
+| `owasp-security.md`        | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security reference                |
+| `hello.md`                 | Test command                                                                |
 
 ### `common-workflow/`
 
@@ -36,7 +36,7 @@ Six sequential step files referenced by agent skills. Steps must execute in orde
 
 1. `01-analyze-qa.md` — Analyze requirements, clarify ambiguities, produce requirement summary for confirmation
 2. `02-plan-and-split-steps.md` — Determine project/task type, create git branch, write `agents-plan/[feature]/plan-step-N.md` files
-3. `03-implement-plan-step.md` — Implement one plan step at a time
+3. `03-implement-plan-step-loop.md` — Implement one plan step at a time
 4. `04-test-loop.md` — Test, fix bugs, repeat until green
 5. `05-code-review-security-and-improvements.md` — Deep code review + security audit
 6. `06-explain-changes-and-final-review.md` — Final summary, delivery confirmation
@@ -54,6 +54,7 @@ Six sequential step files referenced by agent skills. Steps must execute in orde
 Layer order for feature implementation: **Entity → DTO → Repository → Domain → Service → Router → main.py registration**
 
 Layer boundaries (enforced by `backend-feature.md`):
+
 - Router: HTTP in/out only, calls Service, always has `@router_try()` + `verify_user_permission`
 - Service: business logic only, uses `@db_tx` for transactions, calls Repository + Domain
 - Repository: DB CRUD only, uses `db.flush()` never `db.commit()`
@@ -70,6 +71,7 @@ Error handling: `DomainException(msg, type, code)` raised in Domain/Service, cau
 Layer order for feature implementation: **types → constants → API layer → hooks → presentational components → form components → page components → route registration → barrel export**
 
 Layer boundaries (enforced by `frontend-feature.md`):
+
 - API layer: extends `HttpClient`, uses query key factories, no business logic
 - Hooks: one hook per concern — query/mutation/UI state separated
 - Presentational components: pure UI, props only, no direct API calls

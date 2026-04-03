@@ -15,18 +15,18 @@ A collection of custom Claude Code slash commands, agent skills, and workflow gu
 
 Deploy to `.claude/commands/` in a target project. Each file becomes a `/command`.
 
-| Command | Description |
-|---|---|
-| `/git-commit` | Conventional commit flow with confirmation gate — never skips hooks |
-| `/git-review` | Pre-commit review: tests, security, code quality — presents report, asks before fixing |
-| `/backend-feature` | FastAPI feature implementation enforcing layered architecture |
-| `/backend-architecture` | New backend project scaffold (Flat / Feature-based / DDD) |
-| `/frontend-feature` | React 19 + TypeScript feature implementation rules |
-| `/frontend-architecture` | New frontend project scaffold and architecture plan |
-| `/security-review` | Deep security review: OWASP, Trail of Bits, DB, race conditions, AI leakage |
-| `/owasp-security` | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security reference |
-| `/figma-agent` | Extract Figma designs and translate them into production-ready UI code |
-| `/hello` | Smoke-test command |
+| Command                  | Description                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `/git-commit`            | Conventional commit flow with confirmation gate — never skips hooks                    |
+| `/git-review`            | Pre-commit review: tests, security, code quality — presents report, asks before fixing |
+| `/backend-feature`       | FastAPI feature implementation enforcing layered architecture                          |
+| `/backend-architecture`  | New backend project scaffold (Flat / Feature-based / DDD)                              |
+| `/frontend-feature`      | React 19 + TypeScript feature implementation rules                                     |
+| `/frontend-architecture` | New frontend project scaffold and architecture plan                                    |
+| `/security-review`       | Deep security review: OWASP, Trail of Bits, DB, race conditions, AI leakage            |
+| `/owasp-security`        | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security reference                           |
+| `/figma-agent`           | Extract Figma designs and translate them into production-ready UI code                 |
+| `/hello`                 | Smoke-test command                                                                     |
 
 ## Agent Skills
 
@@ -39,6 +39,7 @@ Invoke when implementing a backend feature or scaffolding a new service.
 Layer order: `Entity → DTO → Repository → Domain → Service → Router → main.py`
 
 Key rules:
+
 - Repository: `db.flush()` only — `@db_tx` handles commits
 - Service: business logic wrapped in `@db_tx`
 - Router: every endpoint requires `@router_try()` + `verify_user_permission`
@@ -52,6 +53,7 @@ Invoke when implementing a frontend feature or building UI from a Figma design. 
 Layer order: `Types → Constants → API layer → Hooks → Presentational → Form → Page → Route → Barrel export`
 
 Key rules:
+
 - Styling: Tailwind CSS only — no inline styles, no CSS modules
 - Forms: React Hook Form + Zod, schema in `[Feature]Form.schema.ts`
 - API layer: extend `HttpClient`; use key factories in `[feature].keys.ts`
@@ -62,14 +64,14 @@ Key rules:
 
 Both agent skills follow this ordered workflow. Each step requires user confirmation before advancing — the agent never auto-advances.
 
-| Step | File | Description |
-|---|---|---|
-| 01 | `01-analyze-qa.md` | Analyze requirements, clarify ambiguities, produce requirement summary |
-| 02 | `02-plan-and-split-steps.md` | Create git branch, write `agents-plan/[feature]/plan-step-N.md` files |
-| 03 | `03-implement-plan-step.md` | Implement one plan step at a time in layer order |
-| 04 | `04-test-loop.md` | Test, fix bugs, repeat until green |
-| 05 | `05-code-review-security-and-improvements.md` | Deep code review + security audit |
-| 06 | `06-explain-changes-and-final-review.md` | Final summary and delivery confirmation |
+| Step | File                                          | Description                                                            |
+| ---- | --------------------------------------------- | ---------------------------------------------------------------------- |
+| 01   | `01-analyze-qa.md`                            | Analyze requirements, clarify ambiguities, produce requirement summary |
+| 02   | `02-plan-and-split-steps.md`                  | Create git branch, write `agents-plan/[feature]/plan-step-N.md` files  |
+| 03   | `03-implement-plan-step-loop.md`              | Implement one plan step at a time in layer order                       |
+| 04   | `04-test-loop.md`                             | Test, fix bugs, repeat until green                                     |
+| 05   | `05-code-review-security-and-improvements.md` | Deep code review + security audit                                      |
+| 06   | `06-explain-changes-and-final-review.md`      | Final summary and delivery confirmation                                |
 
 ## Usage
 

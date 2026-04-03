@@ -1,10 +1,11 @@
-# Step 03 - Implement Each Plan Step with Proper Commands
+# Step 03 - Implement Plan Steps in Loop
 
 ## Goal
 
 根據 Step 02 的規劃，逐一實作 `agents-plan/[your-feature]/plan-step-x.md`，
-並依任務類型選擇對應的 commands 執行。
-每完成一個步驟，都需要先給使用者確認，再執行 git review / git commit，然後進入下一個步驟。
+每完成一個步驟後執行 `commands/git-review` 查看 diff 是否滿意，
+確認後執行 `commands/git-commit`，然後自動 loop 繼續實作下一個步驟，
+直到所有 plan-step 全部完成為止。
 
 ---
 
@@ -37,23 +38,32 @@
    - 符合既有架構
    - 優先最小可行修改，不做無關變更
 
-5. 每完成一個步驟，都要：
-   - 說明本次改了什麼
-   - 說明為何這樣改
-   - 說明有哪些檔案受影響
-   - 等待使用者確認
+---
 
-6. 每個 plan-step 經使用者確認後：
-   - 執行 `commands/git-review.md`
-   - 確認 diff 合理
-   - 執行 `commands/git-commit.md`
-   - 單獨 commit 該步驟
+## Loop Execution Flow
+
+對所有 plan-step 依序執行以下 loop，直到全部完成：
+
+```
+LOOP over plan-step-1 → plan-step-2 → ... → plan-step-N:
+
+  1. 讀取當前 plan-step-x.md
+  2. 選擇對應 commands
+  3. 進行實作
+  4. 回報本步驟完成內容（見 Required Output Format）
+  5. 執行 `commands/git-review.md`，展示 diff 供使用者檢視
+  6. 等待使用者確認 diff 是否滿意
+  7. 若確認 OK → 執行 `commands/git-commit.md`，單獨 commit 該步驟
+  8. 自動進入下一個 plan-step，重複 loop
+
+END LOOP when 所有 plan-step 皆完成
+```
+
+> 若使用者對 diff 不滿意，先修正再重新執行 git-review，直到確認為止。
 
 ---
 
 ## Command Mapping Rules
-
-請根據情況選擇 commands：
 
 ### Feature Development
 
@@ -69,22 +79,6 @@
 
 - review diff → `commands/git-review.md`
 - commit changes → `commands/git-commit.md`
-
----
-
-## Step-by-Step Execution Flow
-
-對每個 `plan-step-x.md` 必須遵守以下流程：
-
-1. 讀取該 step 計劃
-2. 選擇對應 commands
-3. 進行實作
-4. 回報本步驟完成內容
-5. 請使用者確認
-6. 若確認 OK：
-   - 執行 `commands/git-review.md`
-   - 執行 `commands/git-commit.md`
-7. 再進入下一個 step
 
 ---
 
@@ -126,10 +120,15 @@
 - 後續影響
 - 待確認項目
 
-### Confirmation
+### Git Review
 
-- 請使用者確認這一步是否 OK
-- 若確認 OK，再執行 git review / git commit，進入下一步
+- 自動執行 `commands/git-review.md`
+- 展示 diff，等待使用者確認是否滿意
+
+### Git Commit
+
+- 使用者確認後自動執行 `commands/git-commit.md`
+- 完成後繼續下一個 plan-step
 
 ---
 
@@ -138,5 +137,5 @@
 只有在以下條件都成立時才能進入 Step 04：
 
 - 所有 plan-step 都已完成實作
-- 每個 plan-step 都已經過使用者確認
-- 每個 plan-step 都已執行 git review 與 git commit
+- 每個 plan-step 都已執行 git-review 並經使用者確認
+- 每個 plan-step 都已執行 git-commit

@@ -3,7 +3,7 @@
 ## Goal
 
 在需求確認後，先判斷專案類型與任務類型，套用對應的架構規範，再建立 branch 並把整體功能拆成可逐步實作、逐步驗證、逐步 commit 的 plan steps，
-並將每個步驟寫入 `agents-plan/[your-feature]/plan-step-x.md`。
+並將每個步驟寫入 currentProject/`.claude/agents-plan/[your-feature]/plan-step-x.md`。
 只有在使用者確認規劃內容合理後，才可進入 Step 03。
 
 ---
@@ -16,31 +16,31 @@
 
 可由呼叫此 workflow 時傳入，或根據當前 codebase 結構自動判斷：
 
-| 判斷依據 | 結果 |
-|---|---|
-| 有 `package.json` + React / Vue / Angular 依賴 | `frontend` |
-| 有 `requirements.txt` / `pyproject.toml` / `go.mod` / `pom.xml` | `backend` |
-| 兩者皆有（monorepo） | 詢問使用者確認範圍 |
+| 判斷依據                                                        | 結果               |
+| --------------------------------------------------------------- | ------------------ |
+| 有 `package.json` + React / Vue / Angular 依賴                  | `frontend`         |
+| 有 `requirements.txt` / `pyproject.toml` / `go.mod` / `pom.xml` | `backend`          |
+| 兩者皆有（monorepo）                                            | 詢問使用者確認範圍 |
 
 ### 2. 任務類型（Task Type）
 
 根據需求描述判斷：
 
-| 信號 | 任務類型 |
-|---|---|
-| 「建立新專案」、「從零開始」、「架構設計」、「scaffold」 | `architecture` |
-| 「新增功能」、「實作」、「修改」、「新增 API」、「新增頁面」 | `feature` |
+| 信號                                                         | 任務類型       |
+| ------------------------------------------------------------ | -------------- |
+| 「建立新專案」、「從零開始」、「架構設計」、「scaffold」     | `architecture` |
+| 「新增功能」、「實作」、「修改」、「新增 API」、「新增頁面」 | `feature`      |
 
 ### 3. 套用對應規範
 
 根據以上判斷，**在規劃步驟時必須參照對應的 command guide**：
 
-| Project Type | Task Type | 參照規範 |
-|---|---|---|
-| `backend` | `architecture` | `.claude/commands/backend-architecture.md` |
-| `backend` | `feature` | `.claude/commands/backend-feature.md` |
-| `frontend` | `architecture` | `.claude/commands/frontend-architecture.md` |
-| `frontend` | `feature` | `.claude/commands/frontend-feature.md` |
+| Project Type | Task Type      | 參照規範                                    |
+| ------------ | -------------- | ------------------------------------------- |
+| `backend`    | `architecture` | `.claude/commands/backend-architecture.md`  |
+| `backend`    | `feature`      | `.claude/commands/backend-feature.md`       |
+| `frontend`   | `architecture` | `.claude/commands/frontend-architecture.md` |
+| `frontend`   | `feature`      | `.claude/commands/frontend-feature.md`      |
 
 > 若無法自動判斷，先詢問使用者再繼續。
 > 在 Required Output Format 的 Summary 區塊中，明確標示已套用哪個規範。

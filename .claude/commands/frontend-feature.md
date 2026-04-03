@@ -580,16 +580,97 @@ npm run type-check
 
 ---
 
+### 14. Unit Test（可選）
+
+開始實作前，**詢問使用者是否要一併撰寫 Unit Test**：
+
+> 「是否需要為此功能撰寫 Unit Test？（y/n）」
+
+若使用者選擇 **是**，在完成每個層次後，緊接著為該層次撰寫對應的測試：
+
+**測試範圍與規範**：
+
+```
+Hooks      → 使用 renderHook + QueryClient wrapper，驗證資料狀態與 mutation 行為
+元件        → 使用 @testing-library/react，驗證 render 輸出與使用者互動
+純函數/工具  → 直接驗證輸入輸出，無需 mock
+```
+
+**檔案結構（測試檔放在被測試檔旁）**：
+
+```
+features/users/
+├── hooks/
+│   ├── use-users.ts
+│   └── use-users.test.ts
+├── components/
+│   ├── UserCard.tsx
+│   └── UserCard.test.tsx
+└── utils/
+    ├── format-user.ts
+    └── format-user.test.ts
+```
+
+**測試範例**：
+
+```typescript
+// hooks/use-users.test.ts
+import { renderHook, waitFor } from "@testing-library/react";
+import { createWrapper } from "@/test/utils";
+import { useUsers } from "./use-users";
+
+describe("useUsers", () => {
+  it("should return users list on success", async () => {
+    const { result } = renderHook(() => useUsers(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toHaveLength(2);
+  });
+});
+```
+
+```typescript
+// components/UserCard.test.tsx
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { UserCard } from "./UserCard";
+
+describe("UserCard", () => {
+  it("renders user name and email", () => {
+    render(<UserCard user={mockUser} onEdit={vi.fn()} />);
+    expect(screen.getByText(mockUser.name)).toBeInTheDocument();
+    expect(screen.getByText(mockUser.email)).toBeInTheDocument();
+  });
+
+  it("calls onEdit with user id when edit button clicked", async () => {
+    const onEdit = vi.fn();
+    render(<UserCard user={mockUser} onEdit={onEdit} />);
+    await userEvent.click(screen.getByRole("button", { name: /編輯/ }));
+    expect(onEdit).toHaveBeenCalledWith(mockUser.id);
+  });
+});
+```
+
+**Checklist（unit test 選項啟用時）**：
+
+- [ ] 純函數 / 工具函數：正常路徑 + 邊界情況皆有覆蓋
+- [ ] Hooks：以 `renderHook` 驗證 query / mutation 狀態變化
+- [ ] 元件：驗證 render 輸出與主要使用者互動（click、input）
+- [ ] 測試命名清楚描述情境：`it("should <behavior> when <condition>")`
+- [ ] 執行 `npm run test` 全部通過後才完成
+
+---
+
 ## 實作流程
 
 收到功能需求後，**按以下順序實作**：
 
+0. **詢問 Unit Test** → 確認使用者是否要一併撰寫 Unit Test
 1. **分析需求** → 識別需要哪些 API、型別、元件、hooks
 2. **型別定義** → `features/[name]/types/index.ts` 先把 interface 定好
 3. **常數定義** → `features/[name]/constants/index.ts` 定義 enum label、config
 4. **API 層** → `[feature].api.ts` + `[feature].keys.ts`
-5. **Hooks** → query hooks、mutation hooks、UI state hooks
-6. **元件** → Presentational 元件（純 UI）→ Form 元件 → Page 元件
+5. **Hooks** → query hooks、mutation hooks、UI state hooks `→ 若選擇 Unit Test，同步撰寫 Hook 測試`
+6. **元件** → Presentational 元件（純 UI）→ Form 元件 → Page 元件 `→ 若選擇 Unit Test，同步撰寫元件測試`
 7. **Barrel export** → `index.ts` 公開外部需要的介面
 8. **Lint / Type check** → 確保品質
 
@@ -600,4 +681,5 @@ npm run type-check
 ## 任務
 
 請根據使用者描述的功能需求，嚴格依照上述規範實作完整 feature 模組。
+**開始前先詢問使用者是否需要撰寫 Unit Test。**
 若需求不清楚，先提問釐清再實作。

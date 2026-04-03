@@ -328,17 +328,88 @@ def get_report_or_raise(db: Session, report_id: int) -> ReportEntity:
 
 ---
 
+### 12. Unit Test（可選）
+
+開始實作前，**詢問使用者是否要一併撰寫 Unit Test**：
+
+> 「是否需要為此功能撰寫 Unit Test？（y/n）」
+
+若使用者選擇 **是**，在完成每個層次後，緊接著為該層次撰寫對應的測試：
+
+**測試範圍與規範**：
+
+```
+Domain  → 純函數測試，無任何 mock，直接驗證輸入輸出
+Service → mock Repository，驗證業務邏輯與例外流程
+Router  → 使用 FastAPI TestClient，驗證 HTTP 狀態碼與 response schema
+```
+
+**檔案結構**：
+
+```
+tests/
+├── domain/
+│   └── test_report_check.py
+├── services/
+│   └── test_report_service.py
+└── routers/
+    └── test_report_router.py
+```
+
+**測試範例**：
+
+```python
+# tests/domain/test_report_check.py
+import pytest
+from app.domain.check_exist.report_check import ensure_report_exists
+from app.domain.exception.domain_exception import DomainException
+
+def test_ensure_report_exists_raises_when_none():
+    with pytest.raises(DomainException) as exc_info:
+        ensure_report_exists(None)
+    assert exc_info.value.type == "report_not_found"
+
+def test_ensure_report_exists_returns_entity(mock_report):
+    result = ensure_report_exists(mock_report)
+    assert result == mock_report
+```
+
+```python
+# tests/services/test_report_service.py
+from unittest.mock import patch, MagicMock
+from app.services import report_service
+from app.dtos.report_dto import CreateReportDTO
+
+@patch("app.services.report_service.report_repository")
+def test_create_report_returns_dto(mock_repo, db_session):
+    mock_repo.create.return_value = MagicMock(id=1, name="Test")
+    dto = CreateReportDTO(name="Test", si_id=1, org_id=1)
+    result = report_service.create_report(db_session, dto, user_id=1)
+    assert result.id == 1
+```
+
+**Checklist（unit test 選項啟用時）**：
+
+- [ ] Domain 純函數：正常路徑 + 例外路徑皆有覆蓋
+- [ ] Service：以 mock Repository 驗證業務邏輯
+- [ ] Router：使用 `TestClient` 驗證主要 endpoint 的狀態碼與 response 格式
+- [ ] 測試命名清楚描述情境：`test_<function>_<scenario>`
+- [ ] 執行 `pytest` 全部通過後才完成
+
+---
+
 ## 實作流程
 
 收到功能需求後，**按以下順序實作**：
 
+0. **詢問 Unit Test** → 確認使用者是否要一併撰寫 Unit Test
 1. **分析需求** → 識別需要哪些 Entity、DTO、Service 函數、Endpoint
 2. **Entity** → 建立或修改 ORM 模型 → 執行 migration
 3. **DTO** → 定義 Request / Response Pydantic model
 4. **Repository** → 建立 CRUD 函數
-5. **Domain** → 建立純函數（check_exist / 計算邏輯）
-6. **Service** → 組合 Repository + Domain 實現業務邏輯
-7. **Router** → 建立 endpoint，加權限驗證
+5. **Domain** → 建立純函數（check_exist / 計算邏輯）`→ 若選擇 Unit Test，同步撰寫 Domain 測試`
+6. **Service** → 組合 Repository + Domain 實現業務邏輯 `→ 若選擇 Unit Test，同步撰寫 Service 測試`
+7. **Router** → 建立 endpoint，加權限驗證 `→ 若選擇 Unit Test，同步撰寫 Router 測試`
 8. **main.py** → 註冊 router
 
 每步驟完成後才進行下一步，**不跳步、不合併層次**。
@@ -348,4 +419,5 @@ def get_report_or_raise(db: Session, report_id: int) -> ReportEntity:
 ## 任務
 
 請根據使用者描述的功能需求，嚴格依照上述規範實作完整功能。
+**開始前先詢問使用者是否需要撰寫 Unit Test。**
 若需求不清楚，先提問釐清再實作。
