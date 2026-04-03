@@ -142,7 +142,7 @@ Upgrade Result: success / failed（錯誤訊息）
 
 ### Step 05 — Code Review, Security, and Improvements
 
-參照 `.claire/common-workflow/05-code-review-security-and-improvements.md`
+參照 `.claude/common-workflow/05-code-review-security-and-improvements.md`
 
 後端安全額外檢查：
 
