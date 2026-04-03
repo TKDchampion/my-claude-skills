@@ -82,6 +82,10 @@ Styling: Tailwind CSS exclusively — no inline styles, no CSS modules.
 Forms: React Hook Form + Zod, schema defined in `[Feature]Form.schema.ts`.
 Mutations: `onSuccess` must call `invalidateQueries`.
 
+## Plan Reuse
+
+Before executing any task, check `.claude/agents-plan/` for existing plan files related to the current feature. If a relevant plan exists, reuse it directly instead of re-generating — this reduces token consumption and avoids redundant analysis.
+
 ## Workflow Rules
 
 **`02-plan-and-split-steps.md` creates `agents-plan/[feature]/plan-step-N.md` files** in the target project before any code is written. Never skip this step.
