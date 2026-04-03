@@ -5,6 +5,15 @@
 
 ---
 
+## 設計稿偵測（啟動前檢查）
+
+在執行任何步驟之前，先檢查使用者輸入是否包含 Figma URL（`figma.com/` 格式）：
+
+- **有 Figma URL** → 先執行 `.claude/commands/figma-agent.md` 的 Step 0–1（設計擷取與快速分析），取得並確認 Design Summary 後，**以 Design Summary 作為本 agent Step 01 的輸入**繼續執行。figma-agent 的 Step 2–4 由本 agent 的 Step 03–06 取代，不另外執行。
+- **無 Figma URL** → 直接從 Step 01 開始。
+
+---
+
 ## Agent Identity
 
 - **Project Type**: `frontend`
