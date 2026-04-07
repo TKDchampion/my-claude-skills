@@ -3,7 +3,7 @@
 ## Goal
 
 在需求確認後，先判斷專案類型與任務類型，套用對應的架構規範，再建立 branch 並把整體功能拆成可逐步實作、逐步驗證、逐步 commit 的 plan steps，
-並將每個步驟寫入 目前的專案的位置`.claude/agents-plan/[your-feature]/plan-step-x.md`。
+並將每個步驟寫入 `agents-plan/[your-feature]/plan-step-x.md`。
 只有在使用者確認規劃內容合理後，才可進入 Step 03。
 
 ---
@@ -121,6 +121,66 @@
 
 ---
 
+## File Output
+
+規劃完成且使用者確認後，**必須將每個 plan-step 寫入獨立 md 檔案**，才算完成 Step 02。
+
+### 資料夾與檔案結構
+
+```
+agents-plan/
+└── [your-feature]/
+    ├── analyze.md          ← 已由 Step 01 建立
+    ├── plan-step-1.md
+    ├── plan-step-2.md
+    └── plan-step-3.md
+    ...
+```
+
+### 每個 plan-step-x.md 的寫入格式
+
+```markdown
+# Plan Step [x] — [步驟名稱]
+
+> Feature: [your-feature]
+> 依賴前步驟：Step [n]（若有）
+
+## Objective
+
+這一步要完成什麼
+
+## Scope
+
+這一步影響哪些模組 / 頁面 / API / DB / 元件
+
+## Files to Modify
+
+- `path/to/file.py` — 說明修改原因
+- `path/to/file.ts` — 說明修改原因
+
+## Implementation Details
+
+具體會做哪些事情（依對應 command guide 的規範順序說明）
+
+## Validation
+
+如何驗證這一步成功
+
+## Risks / Notes
+
+風險、限制、相依性、注意事項
+
+## Done Criteria
+
+- [ ] 條件一
+- [ ] 條件二
+```
+
+> **重要**：每個 plan-step-x.md 都必須實際寫入磁碟，不可只在對話中描述。
+> 建立順序：先建立資料夾，再依 Step 編號依序建立每個檔案。
+
+---
+
 ## Execution Rules
 
 - **先判斷 Project Type 和 Task Type，再切 branch**（見 Step 0）。
@@ -131,6 +191,7 @@
 - 若某步驟太大，必須再細分。
 - 若有前後依賴，需明確標示順序。
 - 規劃完成後，要先給使用者確認，不可直接進入實作。
+- **使用者確認後，立即建立所有 plan-step-x.md 檔案，再進入 Step 03**。
 
 ---
 
@@ -177,6 +238,6 @@
 只有在以下條件都成立時才能進入 Step 03：
 
 - branch 已建立
-- agents-plan 資料夾已規劃
-- 每個 plan-step 文件已建立
+- `agents-plan/[your-feature]/` 資料夾已建立
+- **每個 `plan-step-x.md` 都已實際寫入磁碟**
 - 使用者已確認規劃內容 OK

@@ -76,6 +76,61 @@
 
 ---
 
+## File Output
+
+使用者確認分析結果正確後，**必須將完整分析內容寫入檔案**，再進入 Step 02。
+
+### 檔案路徑
+
+```
+agents-plan/[your-feature]/analyze.md
+```
+
+`[your-feature]` 命名規則：使用 kebab-case，反映本次功能名稱，例如：
+
+- `user-profile-edit`
+- `chatbot-thread-history`
+- `report-export`
+
+### 寫入內容
+
+`analyze.md` 必須包含以下完整內容（直接對應 Required Output Format 各區塊）：
+
+```markdown
+# Requirement Analysis — [feature name]
+
+> 分析日期：[date]
+> 狀態：已確認 ✅
+
+## 1. Requirement Summary
+
+- 本次目標：
+- 預期結果：
+- 影響範圍：
+- 不在此次範圍內：
+
+## 2. Functional Details
+
+- 使用者操作流程：
+- 資料流 / 狀態流：
+- 需要處理的邏輯：
+- 例外 / 邊界情況：
+
+## 3. Risks / Missing Information
+
+- 尚需確認：
+- 潛在風險：
+- 依賴項目：
+
+## 4. Confirmed Assumptions
+
+- （列出所有假設，供 Step 02 以後參照）
+```
+
+> **重要**：在使用者確認前不可建立此檔案。確認後立即建立，才算完成 Step 01。
+
+---
+
 ## Exit Criteria
 
 只有在以下條件都成立時才能進入 Step 02：
@@ -83,5 +138,6 @@
 - 需求已整理完成
 - 關鍵不確定點已釐清，或已明確標示假設
 - 使用者已確認可以往下走
+- **`agents-plan/[your-feature]/analyze.md` 已建立**
 
 若未確認，停留在 Step 01 持續問答釐清。

@@ -30,6 +30,14 @@
 - 是否有 transaction 邊界需要處理
 - 非同步 / SSE / streaming 需求
 
+**檔案輸出（必須執行）**：使用者確認分析結果後，將完整分析寫入：
+
+```
+agents-plan/[your-feature]/analyze.md
+```
+
+此檔案建立完成後，才算 Step 01 結束，可進入 Step 02。
+
 ---
 
 ### Step 02 — Plan, Create Branch, and Split into Steps
@@ -53,6 +61,17 @@
 7. main.py 路由註冊
 
 每個 plan-step 應盡量對應上述單一層次，避免跨層混合。
+
+**檔案輸出（必須執行）**：使用者確認規劃後，依序將每個步驟寫入：
+
+```
+agents-plan/[your-feature]/plan-step-1.md
+agents-plan/[your-feature]/plan-step-2.md
+agents-plan/[your-feature]/plan-step-3.md
+...
+```
+
+所有 plan-step-x.md 都建立完成後，才算 Step 02 結束，可進入 Step 03。
 
 ---
 

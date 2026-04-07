@@ -31,6 +31,8 @@
 
 前端額外需釐清的項目：
 
+前端額外需釐清的項目：
+
 - 需要新增 / 修改哪些頁面或元件
 - 對接的 API endpoints（method、path、request / response schema）
 - UI/UX 設計稿或描述是否存在
@@ -41,6 +43,14 @@
 - 是否有既有的 shared components 可復用
 - 響應式需求（mobile / tablet / desktop breakpoints）
 - 國際化 / 多語系需求
+
+**檔案輸出（必須執行）**：使用者確認分析結果後，將完整分析寫入：
+
+```
+agents-plan/[your-feature]/analyze.md
+```
+
+此檔案建立完成後，才算 Step 01 結束，可進入 Step 02。
 
 ---
 
@@ -67,6 +77,17 @@
 9. Barrel export（`index.ts`）
 
 每個 plan-step 應盡量對應上述單一層次，避免跨層混合。
+
+**檔案輸出（必須執行）**：使用者確認規劃後，依序將每個步驟寫入：
+
+```
+agents-plan/[your-feature]/plan-step-1.md
+agents-plan/[your-feature]/plan-step-2.md
+agents-plan/[your-feature]/plan-step-3.md
+...
+```
+
+所有 plan-step-x.md 都建立完成後，才算 Step 02 結束，可進入 Step 03。
 
 ---
 
