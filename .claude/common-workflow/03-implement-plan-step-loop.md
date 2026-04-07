@@ -2,7 +2,7 @@
 
 ## Goal
 
-根據 Step 02 的規劃，逐一實作 `agents-plan/[your-feature]/plan-step-x.md`，
+根據 Step 02 的規劃，逐一實作 `.claude/agents-plan/[your-feature]/plan-step-x.md`，
 每完成一個步驟後執行 `commands/git-review` 查看 diff 是否滿意，
 確認後執行 `commands/git-commit`，然後自動 loop 繼續實作下一個步驟，
 直到所有 plan-step 全部完成為止。
@@ -25,7 +25,7 @@
    - Frontend architecture → `commands/frontend-architecture.md`
    - Backend architecture → `commands/backend-architecture.md`
 
-3. 嚴格依照 `agents-plan/[your-feature]/plan-step-x.md` 順序逐步執行。
+3. 嚴格依照 `.claude/agents-plan/[your-feature]/plan-step-x.md` 順序逐步執行。
 
 4. 每個 plan-step 實作時必須遵守：
    - clean code

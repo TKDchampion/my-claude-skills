@@ -35,7 +35,7 @@ Each `.md` file becomes a slash command (`/filename`) in target projects:
 Six sequential step files referenced by agent skills. Steps must execute in order with user confirmation between each:
 
 1. `01-analyze-qa.md` — Analyze requirements, clarify ambiguities, produce requirement summary for confirmation
-2. `02-plan-and-split-steps.md` — Determine project/task type, create git branch, write `agents-plan/[feature]/plan-step-N.md` files
+2. `02-plan-and-split-steps.md` — Determine project/task type, create git branch, write `.claude/agents-plan/[feature]/plan-step-N.md` files
 3. `03-implement-plan-step-loop.md` — Implement one plan step at a time
 4. `04-test-loop.md` — Test, fix bugs, repeat until green
 5. `05-code-review-security-and-improvements.md` — Deep code review + security audit
@@ -88,7 +88,7 @@ Before executing any task, check `.claude/agents-plan/` for existing plan files 
 
 ## Workflow Rules
 
-**`02-plan-and-split-steps.md` creates `agents-plan/[feature]/plan-step-N.md` files** in the target project before any code is written. Never skip this step.
+**`02-plan-and-split-steps.md` creates `.claude/agents-plan/[feature]/plan-step-N.md` files** in the target project before any code is written. Never skip this step.
 
 **Each step requires user confirmation** before proceeding to the next. The agent must not auto-advance through the 6-step workflow.
 

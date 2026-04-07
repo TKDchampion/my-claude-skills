@@ -23,22 +23,26 @@
 依序讀取以下檔案（有的才讀）：
 
 **通用**
+
 - `CLAUDE.md` — 專案規範與 Claude 指引
 - `README.md` / `README.zh.md` — 專案說明
 - `.env.example` / `.env.sample` — 環境變數清單
 
 **Backend（Python）**
+
 - `requirements.txt` / `pyproject.toml` / `poetry.lock` — 依賴套件
 - `app/main.py` / `main.py` — 應用程式入口
 - `alembic.ini` / `alembic/` — DB migration 設定
 - `app/` 目錄結構
 
 **Frontend（Node.js）**
+
 - `package.json` — 依賴套件與 scripts
 - `tsconfig.json` / `vite.config.ts` / `next.config.js` — 建置設定
 - `src/` 目錄結構
 
 **其他**
+
 - `docker-compose.yml` / `Dockerfile` — 容器設定
 - `.github/workflows/` — CI/CD 流程
 - `Makefile` — 常用指令
@@ -50,6 +54,7 @@
 根據 Step 1 收集到的資訊，進一步探索：
 
 **Backend 專案**
+
 1. 掃描 `app/` 的子目錄結構，識別分層（routers / services / repositories / domain / entities / dtos）
 2. 讀取 `app/main.py`，了解 router 註冊順序與 middleware
 3. 讀取 2～3 個代表性的 router + service + repository 組合，了解實際業務流程
@@ -58,6 +63,7 @@
 6. 查看 decorator 或共用工具（`@db_tx`, `@router_try`, `@external_api` 等）
 
 **Frontend 專案**
+
 1. 掃描 `src/` 結構，識別 features / pages / components / hooks / api
 2. 讀取路由定義（`App.tsx` / `router.tsx` / `_app.tsx` / `pages/`）
 3. 讀取 2～3 個代表性的 feature 目錄，了解 API 層 → Hook → 元件 的實際結構
@@ -70,6 +76,7 @@
 ### Step 3 — 產出報告
 
 將分析結果寫入 `.claude/agents-plan/introduction-project.md`：
+
 - 若檔案已存在，更新內容（保留原有結構，更新過時資訊）
 - 若不存在，建立新檔案
 
@@ -95,17 +102,17 @@
 
 ## 2. 技術棧
 
-| 類別 | 技術 |
-|------|------|
-| 語言 | ... |
-| 框架 | ... |
-| 資料庫 | ... |
-| ORM / Query | ... |
-| 驗證 / 型別 | ... |
-| 測試 | ... |
-| CI/CD | ... |
-| 容器 | ... |
-| 其他工具 | ... |
+| 類別        | 技術 |
+| ----------- | ---- |
+| 語言        | ...  |
+| 框架        | ...  |
+| 資料庫      | ...  |
+| ORM / Query | ...  |
+| 驗證 / 型別 | ...  |
+| 測試        | ...  |
+| CI/CD       | ...  |
+| 容器        | ...  |
+| 其他工具    | ...  |
 
 ---
 
@@ -114,13 +121,14 @@
 ### 目錄結構
 
 （列出主要目錄，加上一行說明每個目錄的用途）
+```
 
-```
 src/ 或 app/
-├── ...    # 說明
-├── ...    # 說明
-└── ...    # 說明
-```
+├── ... # 說明
+├── ... # 說明
+└── ... # 說明
+
+````
 
 ### 分層架構
 
@@ -209,7 +217,7 @@ src/ 或 app/
 
 # Lint / Type check
 ...
-```
+````
 
 ---
 
@@ -228,6 +236,7 @@ src/ 或 app/
 （如果在分析過程中發現不清楚的地方、奇怪的實作、或明顯的技術債，列在這裡）
 
 - ...
+
 ```
 
 ---
@@ -247,12 +256,17 @@ src/ 或 app/
 報告寫入完畢後，回覆使用者：
 
 ```
+
 報告已產出至 `.claude/agents-plan/introduction-project.md`
 
 快速摘要：
+
 - 專案類型：...
 - 主要技術：...
 - 核心模組：...（列 3～5 個）
 
 有任何想深入了解的部分嗎？
+
+```
+
 ```

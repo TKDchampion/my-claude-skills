@@ -6,7 +6,7 @@ A collection of custom Claude Code slash commands, agent skills, and workflow gu
 
 ```
 .claude/
-├── agents-plan/      # Agent will create plans to here automatically
+├── .claude/agents-plan/      # Agent will create plans to here automatically
 ├── commands/         # Slash command definitions
 ├── skills/           # Agent skill entry points (SKILL.md per agent)
 └── common-workflow/  # Six-step workflow fragments shared by agent skills
@@ -65,14 +65,14 @@ Key rules:
 
 Both agent skills follow this ordered workflow. Each step requires user confirmation before advancing — the agent never auto-advances.
 
-| Step | File                                          | Description                                                            |
-| ---- | --------------------------------------------- | ---------------------------------------------------------------------- |
-| 01   | `01-analyze-qa.md`                            | Analyze requirements, clarify ambiguities, produce requirement summary |
-| 02   | `02-plan-and-split-steps.md`                  | Create git branch, write `agents-plan/[feature]/plan-step-N.md` files  |
-| 03   | `03-implement-plan-step-loop.md`              | Implement one plan step at a time in layer order                       |
-| 04   | `04-test-loop.md`                             | Test, fix bugs, repeat until green                                     |
-| 05   | `05-code-review-security-and-improvements.md` | Deep code review + security audit                                      |
-| 06   | `06-explain-changes-and-final-review.md`      | Final summary and delivery confirmation                                |
+| Step | File                                          | Description                                                                   |
+| ---- | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| 01   | `01-analyze-qa.md`                            | Analyze requirements, clarify ambiguities, produce requirement summary        |
+| 02   | `02-plan-and-split-steps.md`                  | Create git branch, write `.claude/agents-plan/[feature]/plan-step-N.md` files |
+| 03   | `03-implement-plan-step-loop.md`              | Implement one plan step at a time in layer order                              |
+| 04   | `04-test-loop.md`                             | Test, fix bugs, repeat until green                                            |
+| 05   | `05-code-review-security-and-improvements.md` | Deep code review + security audit                                             |
+| 06   | `06-explain-changes-and-final-review.md`      | Final summary and delivery confirmation                                       |
 
 ## Usage
 

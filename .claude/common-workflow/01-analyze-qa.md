@@ -83,7 +83,7 @@
 ### 檔案路徑
 
 ```
-agents-plan/[your-feature]/analyze.md
+.claude/agents-plan/[your-feature]/analyze.md
 ```
 
 `[your-feature]` 命名規則：使用 kebab-case，反映本次功能名稱，例如：
@@ -138,6 +138,6 @@ agents-plan/[your-feature]/analyze.md
 - 需求已整理完成
 - 關鍵不確定點已釐清，或已明確標示假設
 - 使用者已確認可以往下走
-- **`agents-plan/[your-feature]/analyze.md` 已建立**
+- **`.claude/agents-plan/[your-feature]/analyze.md` 已建立**
 
 若未確認，停留在 Step 01 持續問答釐清。

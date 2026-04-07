@@ -3,7 +3,7 @@
 ## Goal
 
 在需求確認後，先判斷專案類型與任務類型，套用對應的架構規範，再建立 branch 並把整體功能拆成可逐步實作、逐步驗證、逐步 commit 的 plan steps，
-並將每個步驟寫入 `agents-plan/[your-feature]/plan-step-x.md`。
+並將每個步驟寫入 `.claude/agents-plan/[your-feature]/plan-step-x.md`。
 只有在使用者確認規劃內容合理後，才可進入 Step 03。
 
 ---
@@ -50,7 +50,7 @@
 ## Core Responsibilities
 
 1. 根據需求命名本次功能資料夾：
-   - `agents-plan/[your-feature]/`
+   - `.claude/agents-plan/[your-feature]/`
 
 2. 自行建立 branch：
    - branch 名稱需清楚反映本次任務性質
@@ -67,8 +67,8 @@
    - 避免一個步驟過大
 
 4. 為每個步驟建立 md 檔，路徑格式：
-   - `agents-plan/[your-feature]/plan-step-1.md`
-   - `agents-plan/[your-feature]/plan-step-2.md`
+   - `.claude/agents-plan/[your-feature]/plan-step-1.md`
+   - `.claude/agents-plan/[your-feature]/plan-step-2.md`
    - ...
 
 5. 每個 plan-step 文件需包含：
@@ -128,7 +128,7 @@
 ### 資料夾與檔案結構
 
 ```
-agents-plan/
+.claude/agents-plan/
 └── [your-feature]/
     ├── analyze.md          ← 已由 Step 01 建立
     ├── plan-step-1.md
@@ -185,7 +185,7 @@ agents-plan/
 
 - **先判斷 Project Type 和 Task Type，再切 branch**（見 Step 0）。
 - 先切 branch，再寫計劃。
-- 不可省略 `agents-plan/[your-feature]/`。
+- 不可省略 `.claude/agents-plan/[your-feature]/`。
 - 拆分步驟要以「可落地、可驗證、可 commit」為原則。
 - 每個 plan-step 的 Implementation Details 必須符合對應 command guide 的規範與順序（例如 backend-feature 要求 Entity → DTO → Repository → Domain → Service → Router 的順序）。
 - 若某步驟太大，必須再細分。
@@ -211,7 +211,7 @@ agents-plan/
 
 ### 2. Plan Folder
 
-- `agents-plan/[your-feature]/`
+- `.claude/agents-plan/[your-feature]/`
 
 ### 3. Step Breakdown
 
@@ -238,6 +238,6 @@ agents-plan/
 只有在以下條件都成立時才能進入 Step 03：
 
 - branch 已建立
-- `agents-plan/[your-feature]/` 資料夾已建立
+- `.claude/agents-plan/[your-feature]/` 資料夾已建立
 - **每個 `plan-step-x.md` 都已實際寫入磁碟**
 - 使用者已確認規劃內容 OK

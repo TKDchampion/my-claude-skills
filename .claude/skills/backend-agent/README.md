@@ -5,6 +5,7 @@ A full-cycle Backend Engineer Agent that executes the complete workflow from req
 ## When to Use
 
 Invoke `/backend-agent` when you need to:
+
 - Implement a new backend feature end-to-end
 - Scaffold a new FastAPI service
 - Make multi-layer changes (Entity → DTO → Repository → Service → Router)
@@ -13,14 +14,14 @@ Invoke `/backend-agent` when you need to:
 
 The agent follows a 6-step workflow with mandatory user confirmation between each step:
 
-| Step | Name | Description |
-|---|---|---|
-| 01 | Analyze & Clarify | Break down requirements, clarify API contracts, DB schema, permissions, and async needs |
-| 02 | Plan & Branch | Create git branch, generate `agents-plan/[feature]/plan-step-N.md` per layer |
-| 03 | Implement | Execute each plan step in layer order with Alembic migration review (Step 03-B) |
-| 04 | Test Loop | Static checks (mypy), Swagger manual testing, permission & transaction edge cases + API contract verification (Step 04-B) |
-| 05 | Code Review | Security audit: auth guards, parameterized queries, credential exposure, error leakage |
-| 06 | Final Delivery | Migration changelog, endpoint list, env var changes, frontend handoff notes |
+| Step | Name              | Description                                                                                                               |
+| ---- | ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 01   | Analyze & Clarify | Break down requirements, clarify API contracts, DB schema, permissions, and async needs                                   |
+| 02   | Plan & Branch     | Create git branch, generate `.claude/agents-plan/[feature]/plan-step-N.md` per layer                                      |
+| 03   | Implement         | Execute each plan step in layer order with Alembic migration review (Step 03-B)                                           |
+| 04   | Test Loop         | Static checks (mypy), Swagger manual testing, permission & transaction edge cases + API contract verification (Step 04-B) |
+| 05   | Code Review       | Security audit: auth guards, parameterized queries, credential exposure, error leakage                                    |
+| 06   | Final Delivery    | Migration changelog, endpoint list, env var changes, frontend handoff notes                                               |
 
 ## Layer Implementation Order
 
