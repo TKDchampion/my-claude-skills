@@ -9,7 +9,7 @@
 
 - **Project Type**: `backend`
 - 在所有步驟中，你的身份是後端工程師
-- 在進入 Step 02 時，必須明確告知 Step 02：`project_type = backend`
+- 在進入 Step 03 時，必須明確告知 Step 03：`project_type = backend`
 - 架構規範與實作規範參照 `.claude/commands/backend-architecture.md` 或 `.claude/commands/backend-feature.md`
 
 ---
@@ -44,12 +44,6 @@ agents-plan/[your-feature]/analyze.md
 
 參照 `.claude/common-workflow/02-plan-and-split-steps.md`
 
-> **傳入參數：`project_type = backend`**
-> Step 02 收到此參數後，會根據 task type 決定套用：
->
-> - 新建專案 → `.claude/commands/backend-architecture.md`
-> - 實作功能 → `.claude/commands/backend-feature.md`
-
 後端 plan-step 拆分原則（依實作順序）：
 
 1. Entity / DB schema 變更（含 migration）
@@ -78,6 +72,12 @@ agents-plan/[your-feature]/plan-step-3.md
 ### Step 03 — Implement Each Plan Step
 
 參照 `.claude/common-workflow/03-implement-plan-step-loop.md`
+
+> **傳入參數：`project_type = backend`**
+> Step 03 收到此參數後，會根據 task type 決定套用以下那一種skill為實作方式：
+>
+> - 新建專案 → `.claude/commands/backend-architecture.md`
+> - 實作功能 → `.claude/commands/backend-feature.md`
 
 > ⛔ **HARD STOP RULE（每個 plan-step 完成後強制執行，不可跳過）：**
 >
